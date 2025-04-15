@@ -6,6 +6,8 @@ import sys, os
 third_field_exists = False
 all_fields = False
 decimal_result = 0
+copy_instantly = False
+
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -59,17 +61,25 @@ def Calculate():
     decimal_answer.config(text=decimal_result)
     
     
-    
-    
-    
+def switch_copy():
+    global copy_instantly
+    copy_instantly = enabled.get()
+    copy()
+    if enabled.get() == 1:
+        
+        copy_button.config(state=DISABLED)
+    else:
+        copy_button.config(state=NORMAL)
+
 def isint(s):
     try:
         int(s)
         return True
     except ValueError:
         return False
+
 def reset():
-    global third_field_exists, all_fields, fraction_3, fraction_3_num, fraction_3_denom, fraction_3_label, fraction_3_minus, fraction_4, fraction_4_num, fraction_4_denom, fraction_4_label, fraction_4_minus
+    global third_field_exists, all_fields, fraction_3, fraction_3_num, fraction_3_denom, fraction_3_label, fraction_3_minus, fraction_4, fraction_4_num, fraction_4_denom, fraction_4_label, fraction_4_minus, decimal_answer
     third_field_exists, all_fields = False, False
     fraction_3.pack_forget()
     fraction_3_label.pack_forget()
@@ -93,6 +103,8 @@ def reset():
     answer_num.config(text=0)
     answer_denom.config(text=0)
     fraction_1_num.focus()
+    decimal_answer.config(text=0)
+
 def AddField():
     global third_field_exists, all_fields, fraction_3, fraction_3_num, fraction_3_denom, fraction_3_label, fraction_3_minus, fraction_4, fraction_4_num, fraction_4_denom, fraction_4_label, fraction_4_minus, add_button
     if not all_fields:
@@ -176,7 +188,9 @@ root.title("Сложение дробей")
 root.config(bg='azure3')
 root.iconbitmap('icon.ico')
 root.geometry('830x600+80+80')
-root.resizable(False, False)
+root.resizable(True, True)
+enabled = IntVar()
+enabled.set(1)
 
 (fraction_1 := Frame(root, bg='azure3')).grid(row=0, column = 0)
 Label(fraction_1, text='Первая дробь:', bg='azure3').pack(ipadx=10, ipady=10, side=TOP)
@@ -219,7 +233,21 @@ Label(answer, text='--------', bg='azure3').pack(ipadx=10, ipady=10, side=TOP)
 (decimal_answer := Label(root, text=0, bg='azure3')).grid(row=1, column = 4)
 copy_image = PhotoImage(file = "copy.png")
 (copy_button := Button(root, text='Копировать', bg='darkgray', relief=GROOVE, command=copy, bd=8, image=copy_image, compound=TOP)).grid(row=2, column = 4)
+(checkbox := Checkbutton(
+    root,
+    text='Автоматически копировать результат в буфер обмена',
+    variable=enabled,
+    command=switch_copy,
+    wraplength=100,
+    anchor='w',
+    justify=LEFT,
+    bg='azure3',
+    activebackground='azure3',
+    fg='black'
+)).grid(row=2, column=0, sticky='w', padx=5, pady=5)
 
+# Добавьте после этой строки:
+root.grid_columnconfigure(0, weight=1)  # Растягивание колонки
 
 (add_button := Button(root, text='+', bg='darkgray', relief=GROOVE, bd=8, width=8, command=AddField)).grid(row=0, column = 2)
 Button(root, text='Рассчитать', bg='darkgray', relief=GROOVE, bd=8, width=28, command=Calculate).grid(row=1, column = 2)
